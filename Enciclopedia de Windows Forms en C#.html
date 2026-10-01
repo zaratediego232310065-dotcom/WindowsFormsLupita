@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Enciclopedia de Windows Forms en C#</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050505;
+            --panel: #0e0e0e;
+            --panel2: #171717;
+            --line: #262626;
+            --tx: #ededed;
+            --mu: #9a9a9a;
+            --ac: #8fa8c4;
+            --acbg: rgba(143, 168, 196, .12);
+            --ok: #7fb69a;
+            --bad: #c98a8a;
+            --code: #0a0a0a;
+            --serif: "Newsreader", Georgia, serif;
+            --sans: "IBM Plex Sans", system-ui, sans-serif;
+            --mono: "IBM Plex Mono", ui-monospace, monospace
+        }
+
+        :root[data-theme="light"] {
+            --bg: #ffffff;
+            --panel: #f6f6f6;
+            --panel2: #ececec;
+            --line: #dcdcdc;
+            --tx: #111;
+            --mu: #595959;
+            --ac: #34506e;
+            --acbg: rgba(52, 80, 110, .09);
+            --ok: #2f6f4f;
+            --bad: #9b3d3d;
+            --code: #f1f1f1
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html {
+            scroll-behavior: smooth;
+            height: 100%;
+            scroll-padding-top: calc(72px + env(safe-area-inset-top, 0px))
+        }
+
+        :root {
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px)
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--tx);
+            font: 16px/1.7 var(--sans);
+            transition: background .5s, color .5s
+        }
+
+        code,
+        pre {
+            font-family: var(--mono)
+        }
+
+        code {
+            background: var(--panel2);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: .88em;
+            color: var(--ac)
+        }
+
+        header {
+            position: sticky;
+            top: env(safe-area-inset-top, 0px);
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            height: 60px;
+            padding: 0 20px;
+            background: color-mix(in srgb, var(--bg) 88%, transparent);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--line);
+            transition: background .5s, border-color .5s
+        }
+
+        header b {
+            font: 600 1.1rem var(--serif);
+            letter-spacing: .2px
+        }
+
+        header small {
+            color: var(--mu);
+            font-size: .8rem
+        }
+
+        .sp {
+            flex: 1
+        }
+
+        button {
+            font: inherit;
+            color: inherit;
+            cursor: pointer
+        }
+
+        .ib {
+            border: 1px solid var(--line);
+            background: var(--panel);
+            border-radius: 8px;
+            padding: 7px 14px;
+            font-size: .85rem;
+            transition: .25s
+        }
+
+        .ib:hover {
+            border-color: var(--ac);
+            transform: translateY(-1px)
+        }
+
+        #menu {
+            display: none
+        }
+
+        .wrap {
+            display: grid;
+            grid-template-columns: 290px minmax(0, 1fr)
+        }
+
+        aside {
+            position: sticky;
+            top: calc(60px + env(safe-area-inset-top, 0px));
+            height: calc(100vh - 60px);
+            overflow: auto;
+            padding: 22px 16px;
+            border-right: 1px solid var(--line);
+            background: var(--panel);
+            transition: background .5s, transform .4s
+        }
+
+        .tree {
+            font: .82rem var(--mono);
+            list-style: none;
+            margin: 0;
+            padding: 0
+        }
+
+        .tree summary {
+            cursor: pointer;
+            padding: 6px 8px;
+            border-radius: 6px;
+            color: var(--tx);
+            list-style: none;
+            transition: background .2s
+        }
+
+        .tree summary::-webkit-details-marker {
+            display: none
+        }
+
+        .tree summary::before {
+            content: "▸";
+            display: inline-block;
+            width: 16px;
+            color: var(--mu);
+            transition: transform .3s
+        }
+
+        .tree details[open]>summary::before {
+            transform: rotate(90deg)
+        }
+
+        .tree summary:hover {
+            background: var(--panel2)
+        }
+
+        .tree .fl {
+            display: block;
+            margin: 1px 0 1px 22px;
+            padding: 5px 10px;
+            border-left: 1px solid var(--line);
+            color: var(--mu);
+            text-decoration: none;
+            border-radius: 0 6px 6px 0;
+            transition: .25s
+        }
+
+        .tree .fl:hover {
+            color: var(--tx);
+            background: var(--panel2)
+        }
+
+        .tree .fl.on {
+            color: var(--ac);
+            border-left-color: var(--ac);
+            background: var(--acbg)
+        }
+
+        .tree details>div {
+            animation: dd .35s ease
+        }
+
+        @keyframes dd {
+            from {
+                opacity: 0;
+                transform: translateY(-6px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        main {
+            padding: 48px clamp(20px, 5vw, 72px) 90px;
+            max-width: 1040px
+        }
+
+        .hero {
+            padding: 20px 0 44px;
+            border-bottom: 1px solid var(--line);
+            animation: in 1s cubic-bezier(.2, .7, .2, 1)
+        }
+
+        @keyframes in {
+            from {
+                opacity: 0;
+                transform: translateY(18px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        .path {
+            font: .8rem var(--mono);
+            color: var(--mu)
+        }
+
+        h1 {
+            font: 600 clamp(2rem, 4.6vw, 3.2rem)/1.12 var(--serif);
+            margin: 14px 0 16px;
+            letter-spacing: -.01em
+        }
+
+        .lead {
+            color: var(--mu);
+            font-size: 1.1rem;
+            max-width: 62ch
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 22px
+        }
+
+        .chips span {
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 5px 14px;
+            font-size: .82rem;
+            color: var(--mu)
+        }
+
+        section {
+            padding: 54px 0 6px
+        }
+
+        h2 {
+            font: 600 1.9rem/1.2 var(--serif);
+            margin: 0 0 10px
+        }
+
+        h3 {
+            font: 600 1.15rem var(--serif);
+            margin: 0 0 6px
+        }
+
+        p {
+            max-width: 68ch;
+            margin: 0 0 14px
+        }
+
+        .rv {
+            opacity: 0;
+            transform: translateY(14px);
+            transition: opacity .7s ease, transform .7s ease
+        }
+
+        .rv.show {
+            opacity: 1;
+            transform: none
+        }
+
+        .g2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 18px;
+            margin: 20px 0
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 20px;
+            transition: border-color .3s, transform .3s, background .5s
+        }
+
+        .card:hover {
+            border-color: var(--ac);
+            transform: translateY(-3px)
+        }
+
+        .card.tall {
+            border-radius: 12px 12px 26px 12px
+        }
+
+        .tag {
+            font: .75rem var(--mono);
+            color: var(--ac)
+        }
+
+        pre {
+            background: var(--code);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 16px;
+            overflow-x: auto;
+            font-size: .84rem;
+            line-height: 1.65;
+            margin: 14px 0;
+            transition: background .5s
+        }
+
+        .k {
+            color: var(--ac)
+        }
+
+        .c {
+            color: var(--mu)
+        }
+
+        .s {
+            color: var(--ok)
+        }
+
+        .note {
+            border-left: 3px solid var(--ac);
+            background: var(--acbg);
+            padding: 14px 18px;
+            border-radius: 0 10px 10px 0;
+            margin: 20px 0;
+            max-width: 72ch
+        }
+
+        .warn {
+            border-left-color: var(--bad)
+        }
+
+        ol.tl {
+            list-style: none;
+            padding: 0;
+            margin: 22px 0;
+            counter-reset: s;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 14px
+        }
+
+        ol.tl li {
+            counter-increment: s;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 16px;
+            position: relative;
+            transition: .3s
+        }
+
+        ol.tl li::before {
+            content: counter(s);
+            position: absolute;
+            top: -12px;
+            left: 14px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--ac);
+            color: var(--bg);
+            font: 600 .8rem/24px var(--mono);
+            text-align: center
+        }
+
+        ol.tl li:hover {
+            transform: translateY(-3px);
+            border-color: var(--ac)
+        }
+
+        ol.tl b {
+            font-family: var(--mono);
+            font-size: .9rem;
+            display: block;
+            margin-bottom: 6px
+        }
+
+        ol.tl span {
+            font-size: .88rem;
+            color: var(--mu)
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .9rem;
+            margin: 18px 0
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--line)
+        }
+
+        th {
+            color: var(--mu);
+            font-weight: 500;
+            font-size: .8rem
+        }
+
+        td:first-child {
+            font-family: var(--mono);
+            color: var(--ac)
+        }
+
+        tr {
+            transition: background .2s
+        }
+
+        tbody tr:hover {
+            background: var(--panel)
+        }
+
+        .win {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--panel)
+        }
+
+        .tb {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 16px;
+            background: var(--panel2);
+            font: .8rem var(--mono);
+            color: var(--mu)
+        }
+
+        .body {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            padding: 22px
+        }
+
+        label {
+            display: block;
+            font: .78rem var(--mono);
+            color: var(--mu);
+            margin: 0 0 5px
+        }
+
+        input[type=text],
+        select {
+            width: 100%;
+            padding: 9px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--line);
+            background: var(--bg);
+            color: var(--tx);
+            font: inherit;
+            margin-bottom: 14px;
+            transition: border-color .25s, box-shadow .25s
+        }
+
+        input:focus,
+        select:focus,
+        button:focus-visible {
+            outline: none;
+            border-color: var(--ac);
+            box-shadow: 0 0 0 3px var(--acbg)
+        }
+
+        .btn {
+            background: var(--ac);
+            color: var(--bg);
+            border: 0;
+            border-radius: 6px;
+            padding: 9px 18px;
+            font-weight: 600;
+            transition: .2s
+        }
+
+        .btn:active {
+            transform: scale(.96)
+        }
+
+        .btn:disabled {
+            opacity: .35;
+            cursor: not-allowed
+        }
+
+        .btn.ghost {
+            background: var(--panel2);
+            color: var(--tx);
+            margin-left: 6px
+        }
+
+        .out {
+            background: var(--bg);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 14px;
+            min-height: 64px;
+            transition: .3s
+        }
+
+        .out.flash {
+            animation: fl .6s
+        }
+
+        @keyframes fl {
+            from {
+                background: var(--acbg)
+            }
+
+            to {
+                background: var(--bg)
+            }
+        }
+
+        .log {
+            font: .76rem var(--mono);
+            color: var(--mu);
+            margin-top: 10px;
+            min-height: 2.6em
+        }
+
+        .q {
+            margin: 16px 0
+        }
+
+        .opts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 8px
+        }
+
+        .opts button {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: .9rem;
+            transition: .25s
+        }
+
+        .opts button:hover {
+            border-color: var(--ac)
+        }
+
+        .opts .ok {
+            border-color: var(--ok);
+            color: var(--ok)
+        }
+
+        .opts .no {
+            border-color: var(--bad);
+            color: var(--bad)
+        }
+
+        .fb {
+            font-size: .88rem;
+            margin-top: 6px;
+            min-height: 1.4em
+        }
+
+        footer {
+            border-top: 1px solid var(--line);
+            padding: 24px;
+            color: var(--mu);
+            font-size: .85rem;
+            text-align: center
+        }
+
+        :root {
+            color-scheme: dark
+        }
+
+        :root[data-theme="light"] {
+            color-scheme: light
+        }
+
+        .demo {
+            background: var(--bg);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 12px 0 8px;
+            transition: background .5s
+        }
+
+        .demo input:not([type=checkbox]):not([type=radio]),
+        .demo select {
+            width: 100%;
+            margin: 0;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--line);
+            background: var(--bg);
+            color: var(--tx);
+            font: inherit
+        }
+
+        .demo label {
+            font: inherit;
+            color: var(--tx);
+            margin: 4px 0;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            cursor: pointer
+        }
+
+        .demo fieldset {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            margin: 0;
+            color: var(--mu);
+            font-size: .88rem
+        }
+
+        .demo progress {
+            accent-color: var(--ac)
+        }
+
+        .demo table {
+            margin: 0;
+            font-size: .82rem;
+            cursor: pointer
+        }
+
+        .ev {
+            font: .74rem var(--mono);
+            color: var(--mu);
+            min-height: 1.4em;
+            transition: color .3s
+        }
+
+        .cd {
+            font: .76rem var(--mono);
+            color: var(--ac);
+            margin-top: 4px;
+            word-break: break-word
+        }
+
+        .card h3 {
+            display: inline;
+            margin-left: 6px
+        }
+
+        @media(max-width:860px) {
+            .wrap {
+                grid-template-columns: 1fr
+            }
+
+            #menu {
+                display: inline-block
+            }
+
+            aside {
+                position: fixed;
+                z-index: 15;
+                left: 0;
+                top: calc(60px + env(safe-area-inset-top, 0px));
+                width: 290px;
+                transform: translateX(-105%)
+            }
+
+            aside.open {
+                transform: none
+            }
+
+            header small {
+                display: none
+            }
+        }
+
+        @media(prefers-reduced-motion:reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+                scroll-behavior: auto !important
+            }
+
+            .rv {
+                opacity: 1;
+                transform: none
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <button class="ib" id="menu" aria-label="Abrir índice">☰</button>
+        <b>Enciclopedia WinForms</b><small>C# 12 · .NET 8 · Nivel principiante</small>
+        <span class="sp"></span>
+        <button class="ib" id="theme" aria-label="Cambiar tema">Modo claro</button>
+    </header>
+
+    <div class="wrap">
+        <aside id="side">
+            <ul class="tree">
+                <li>
+                    <details open>
+                        <summary>01-Fundamentos/</summary>
+                        <div>
+                            <a class="fl" href="#intro">que-es-winforms.md</a>
+                            <a class="fl" href="#anatomia">anatomia-proyecto.md</a>
+                        </div>
+                    </details>
+                </li>
+                <li>
+                    <details open>
+                        <summary>02-Programacion/</summary>
+                        <div>
+                            <a class="fl" href="#eventos">eventos.md</a>
+                            <a class="fl" href="#ciclo">ciclo-de-vida.md</a>
+                        </div>
+                    </details>
+                </li>
+                <li>
+                    <details open>
+                        <summary>03-Controles/</summary>
+                        <div>
+                            <a class="fl" href="#controles">galeria-controles.md</a>
+                        </div>
+                    </details>
+                </li>
+                <li>
+                    <details open>
+                        <summary>04-Laboratorio/</summary>
+                        <div>
+                            <a class="fl" href="#sim">simulador.app</a>
+                            <a class="fl" href="#errores">errores-comunes.md</a>
+                        </div>
+                    </details>
+                </li>
+                <li>
+                    <details open>
+                        <summary>05-Evaluacion/</summary>
+                        <div>
+                            <a class="fl" href="#quiz">mini-quiz.exam</a>
+                        </div>
+                    </details>
+                </li>
+            </ul>
+        </aside>
+
+        <main>
+            <div class="hero">
+                <div class="path">enciclopedia / windows-forms / inicio</div>
+                <h1>Windows Forms en C#: del programa de consola a la ventana gráfica</h1>
+                <p class="lead">Una guía pensada para primer semestre. Aquí aprenderás qué es una interfaz gráfica, cómo
+                    responde a lo que hace el usuario y cómo escribir tu primera aplicación de escritorio sin
+                    frustrarte.</p>
+                <div class="chips"><span>Dificultad: básica</span><span>Lectura: 15 minutos</span><span>Requisito:
+                        variables y métodos</span></div>
+            </div>
+
+            <section id="intro" class="rv">
+                <h2>1. ¿Qué es Windows Forms?</h2>
+                <p>Hasta ahora tus programas vivían en una terminal: pedías datos con <code>Console.ReadLine()</code> y
+                    mostrabas resultados con <code>Console.WriteLine()</code>. <b>Windows Forms</b> (WinForms) es la
+                    biblioteca de .NET para crear aplicaciones de escritorio con ventanas, botones, cajas de texto y
+                    menús.</p>
+                <div class="g2">
+                    <div class="card"><span class="tag">Consola</span>
+                        <h3>Flujo lineal</h3>
+                        <p>El código corre de arriba hacia abajo. El programa decide cuándo pedir datos y se detiene
+                            hasta que presionas Enter.</p>
+                    </div>
+                    <div class="card tall"><span class="tag">Windows Forms</span>
+                        <h3>Flujo por eventos</h3>
+                        <p>El usuario decide el orden: puede escribir, hacer clic o cerrar la ventana en cualquier
+                            momento. Tu código espera y reacciona.</p>
+                    </div>
+                </div>
+                <div class="note"><b>Dato histórico.</b> WinForms apareció en 2002 con .NET Framework 1.0. Hoy existen
+                    WPF, MAUI y Blazor, pero WinForms sigue siendo muy usado para aprender programación orientada a
+                    objetos y eventos, porque muestra con claridad cómo se comunican la interfaz y tu código.</div>
+            </section>
+
+            <section id="anatomia" class="rv">
+                <h2>2. Anatomía de un proyecto</h2>
+                <p>Al crear una <i>Aplicación de Windows Forms</i> en Visual Studio verás varios archivos. Cada uno
+                    tiene una función distinta:</p>
+                <div class="g2">
+                    <div class="card"><span class="tag">Program.cs</span>
+                        <h3>Punto de entrada</h3>
+                        <p>Contiene <code>Main()</code>. Prepara la configuración visual y abre la ventana principal.
+                        </p>
+                    </div>
+                    <div class="card"><span class="tag">Form1.cs</span>
+                        <h3>Tu código</h3>
+                        <p>Es una <code>partial class</code> que hereda de <code>Form</code>. Aquí escribes tus eventos
+                            y tu lógica.</p>
+                    </div>
+                    <div class="card"><span class="tag">Form1.Designer.cs</span>
+                        <h3>Código del diseñador</h3>
+                        <p>Visual Studio lo genera cuando arrastras controles. Contiene
+                            <code>InitializeComponent()</code>. Evita editarlo a mano al inicio.</p>
+                    </div>
+                    <div class="card"><span class="tag">Form1.resx</span>
+                        <h3>Recursos</h3>
+                        <p>Archivo XML con imágenes, íconos y textos que usa el formulario.</p>
+                    </div>
+                </div>
+                <pre><span class="c">// Program.cs (.NET 8)</span>
+<span class="k">static class</span> Program
+{
+    [STAThread]
+    <span class="k">static void</span> Main()
+    {
+        ApplicationConfiguration.Initialize();  <span class="c">// estilos visuales y DPI</span>
+        Application.Run(<span class="k">new</span> Form1());          <span class="c">// abre la ventana y el bucle de mensajes</span>
+    }
+}</pre>
+            </section>
+
+            <section id="eventos" class="rv">
+                <h2>3. Programación guiada por eventos</h2>
+                <p>Piensa en el timbre de una casa. No abres la puerta cada segundo por si acaso: esperas. Cuando
+                    alguien toca (<i>evento</i>), ejecutas una acción (<i>manejador</i>). En WinForms tu código
+                    permanece inactivo hasta que el usuario hace algo, y entonces Windows llama al manejador
+                    correspondiente.</p>
+                <pre><span class="k">private void</span> btnSaludar_Click(<span class="k">object</span> sender, EventArgs e)
+{
+    <span class="k">string</span> nombre = txtNombre.Text;               <span class="c">// leer el TextBox</span>
+    lblMensaje.Text = <span class="s">$"Hola {nombre}, bienvenido"</span>;   <span class="c">// escribir en un Label</span>
+    MessageBox.Show(<span class="s">"Perfil cargado"</span>, <span class="s">"Aviso"</span>);   <span class="c">// ventana emergente</span>
+}</pre>
+                <div class="g2">
+                    <div class="card"><span class="tag">object sender</span>
+                        <h3>Quién lo disparó</h3>
+                        <p>Es el control que generó el evento. Si varios botones comparten un manejador,
+                            <code>((Button)sender).Text</code> te dice cuál se presionó.</p>
+                    </div>
+                    <div class="card"><span class="tag">EventArgs e</span>
+                        <h3>Datos del evento</h3>
+                        <p>Trae información extra. En eventos de ratón (<code>MouseEventArgs</code>) incluye la
+                            posición; en teclado (<code>KeyEventArgs</code>) la tecla pulsada.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ciclo" class="rv">
+                <h2>4. Ciclo de vida de un formulario</h2>
+                <p>Un formulario se crea, se muestra, se usa y se cierra. Saber en qué momento escribir tu código evita
+                    errores como <code>NullReferenceException</code>.</p>
+                <ol class="tl">
+                    <li><b>Constructor</b><span>Llama a <code>InitializeComponent()</code>. Los controles existen en
+                            memoria, pero no se ven.</span></li>
+                    <li><b>Load</b><span>Antes de mostrarse. Úsalo para llenar listas e inicializar valores.</span></li>
+                    <li><b>Shown</b><span>La ventana ya es visible. Útil para dar foco a un campo.</span></li>
+                    <li><b>FormClosing</b><span>El usuario cierra la ventana. Puedes cancelar con
+                            <code>e.Cancel = true</code>.</span></li>
+                    <li><b>FormClosed</b><span>La ventana se cerró. Libera recursos que hayas abierto.</span></li>
+                </ol>
+            </section>
+
+            <section id="controles" class="rv">
+                <h2>5. Galería de controles</h2>
+                <p>Los controles son los objetos visuales que colocas en el formulario. Cada uno tiene propiedades (su
+                    aspecto y datos), métodos y eventos. Aquí tienes los 15 más usados: interactúa con cada demo y mira
+                    debajo qué evento de C# se dispararía. El recuadro de color es el prefijo recomendado para
+                    nombrarlo.</p>
+                <div class="g2" id="gal"></div>
+                <div class="note"><b>Cómo agregarlos en Visual Studio.</b> Abre el Cuadro de herramientas (Ctrl+Alt+X),
+                    arrastra el control al formulario, ajusta sus propiedades con F4 y haz doble clic para generar su
+                    manejador de evento principal.</div>
+            </section>
+
+            <section id="sim" class="rv">
+                <h2>6. Simulador interactivo</h2>
+                <p>Escribe un nombre, elige una carrera y presiona el botón. Observa cómo se genera el evento y cómo
+                    cambian las propiedades.</p>
+                <div class="win">
+                    <div class="tb"><span>MiPrimeraApp [Form1]</span><span>UI thread</span></div>
+                    <div class="body">
+                        <div>
+                            <label>txtNombre.Text</label><input type="text" id="n" value="Carlos Mendoza">
+                            <label>cmbCarrera.SelectedItem</label>
+                            <select id="c">
+                                <option>Ingeniería de Software</option>
+                                <option>Ciencias de la Computación</option>
+                                <option>Ingeniería en Ciberseguridad</option>
+                                <option>Inteligencia Artificial</option>
+                            </select>
+                            <label><input type="checkbox" id="en" checked> btnProcesar.Enabled</label>
+                            <button class="btn" id="go">btnProcesar</button><button class="btn ghost"
+                                id="cl">Limpiar</button>
+                        </div>
+                        <div>
+                            <label>lblResultado.Text</label>
+                            <div class="out" id="o">Esperando acción del usuario.</div>
+                            <div class="log" id="lg">[Cola de mensajes] vacía</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="errores" class="rv">
+                <h2>7. Cuatro errores frecuentes</h2>
+                <div class="g2">
+                    <div class="card">
+                        <h3>Nombres por defecto</h3>
+                        <p><code>button1</code> y <code>textBox1</code> vuelven ilegible tu código. Usa
+                            <code>btnGuardar</code>, <code>txtNombre</code>.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Olvidar que Text es string</h3>
+                        <p>Aunque escriban 25, es texto. Convierte con <code>int.Parse(txtEdad.Text)</code> o, mejor,
+                            <code>int.TryParse</code> para evitar excepciones.</p>
+                    </div>
+                    <div class="card">
+                        <h3>MessageBox dentro de un bucle</h3>
+                        <p>Mostrar mil ventanas obliga a dar mil clics. Acumula el resultado y muéstralo una sola vez en
+                            un Label.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Thread.Sleep en la interfaz</h3>
+                        <p>Congela la ventana ("No responde"). Usa <code>await Task.Delay(5000)</code> en un método
+                            <code>async</code>.</p>
+                    </div>
+                </div>
+                <div class="note warn"><b>Regla de oro.</b> No edites <code>Form1.Designer.cs</code> a mano mientras
+                    aprendes: un cambio erróneo puede dañar el diseñador visual.</div>
+            </section>
+
+            <section id="quiz" class="rv">
+                <h2>8. Mini-quiz</h2>
+                <div id="qz"></div>
+            </section>
+        </main>
+    </div>
+    <footer>Enciclopedia didáctica de Windows Forms · Material para primer semestre</footer>
+
+    <script>
+        (function () {
+            var root = document.documentElement, tb = document.getElementById('theme');
+            function setTheme(t) { root.setAttribute('data-theme', t); tb.textContent = t === 'dark' ? 'Modo claro' : 'Modo oscuro' }
+            try { var s = localStorage.getItem('wf-theme'); if (s) setTheme(s) } catch (e) { }
+            tb.onclick = function () { var t = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; setTheme(t); try { localStorage.setItem('wf-theme', t) } catch (e) { } };
+            var side = document.getElementById('side');
+            document.getElementById('menu').onclick = function () { side.classList.toggle('open') };
+            side.addEventListener('click', function (e) { if (e.target.classList.contains('fl')) side.classList.remove('open') });
+            var links = [].slice.call(document.querySelectorAll('.fl')), secs = [].slice.call(document.querySelectorAll('section'));
+            var io = new IntersectionObserver(function (es) { es.forEach(function (x) { if (x.isIntersecting) { x.target.classList.add('show'); links.forEach(function (l) { l.classList.toggle('on', l.getAttribute('href') === '#' + x.target.id) }) } }) }, { threshold: .2 });
+            secs.forEach(function (x) { io.observe(x) });
+            var $ = function (i) { return document.getElementById(i) }, o = $('o'), lg = $('lg');
+            $('go').onclick = function () {
+                var n = $('n').value.trim() || 'Estudiante';
+                o.textContent = 'Bienvenido(a), ' + n + '. Matrícula en: ' + $('c').value + '.';
+                o.classList.remove('flash'); void o.offsetWidth; o.classList.add('flash');
+                lg.textContent = '[Mensaje] WM_LBUTTONUP → btnProcesar_Click(sender, e)'
+            };
+            $('cl').onclick = function () { $('n').value = ''; o.textContent = 'Campos limpiados.'; lg.textContent = '[Evento] Controles reiniciados'; $('n').focus() };
+            $('en').onchange = function () { $('go').disabled = !this.checked; lg.textContent = '[Evento] CheckedChanged → btnProcesar.Enabled = ' + (this.checked ? 'True' : 'False') };
+            $('c').onchange = function () { lg.textContent = '[Evento] SelectedIndexChanged → ' + this.value };
+            var Q = [['¿Qué evento ocurre antes de que el formulario se dibuje por primera vez?', ['FormClosed', 'Load', 'btnCalcular_Click'], 1, 'Load se dispara antes de mostrar la ventana.'],
+            ['Si el usuario escribe 42 en txtEdad, ¿qué tipo devuelve txtEdad.Text?', ['int', 'string', 'double'], 1, 'Text siempre es string; hay que convertirlo.'],
+            ['¿Qué método de Program.cs inicia el bucle de mensajes?', ['Console.ReadLine()', 'Application.Run(...)', 'Form.ShowDialog()'], 1, 'Application.Run mantiene la ventana atendiendo eventos.']];
+            var qz = $('qz');
+            Q.forEach(function (q, i) {
+                var d = document.createElement('div'); d.className = 'q';
+                d.innerHTML = '<p><b>' + (i + 1) + '. ' + q[0] + '</b></p><div class="opts"></div><div class="fb"></div>';
+                var ob = d.querySelector('.opts'), fb = d.querySelector('.fb');
+                q[1].forEach(function (t, j) {
+                    var b = document.createElement('button'); b.textContent = t;
+                    b.onclick = function () {
+                        [].forEach.call(ob.children, function (x) { x.classList.remove('ok', 'no') });
+                        var good = j === q[2]; b.classList.add(good ? 'ok' : 'no');
+                        fb.style.color = good ? 'var(--ok)' : 'var(--bad)'; fb.textContent = good ? 'Correcto. ' + q[3] : 'Incorrecto. Intenta de nuevo.'
+                    };
+                    ob.appendChild(b)
+                }); qz.appendChild(d)
+            });
+
+            var G = [
+                ['btn', 'Button', 'Ejecuta una acción cuando el usuario hace clic.', `<button class="btn" data-e="Click" data-t="click">Guardar</button>`, 'btnGuardar.Enabled = false;'],
+                ['lbl', 'Label', 'Muestra texto que el usuario no edita.', `<span data-e="Click" data-t="click" style="cursor:pointer">Hola, haz clic en esta etiqueta</span>`, 'lblMensaje.Text = "Listo";'],
+                ['txt', 'TextBox', 'Caja para que el usuario escriba texto.', `<input type="text" placeholder="Escribe aquí" data-e="TextChanged" data-t="input">`, 'string dato = txtNombre.Text;'],
+                ['cmb', 'ComboBox', 'Lista desplegable para elegir una opción.', `<select data-e="SelectedIndexChanged" data-t="change"><option>Software</option><option>Redes</option><option>Datos</option></select>`, 'cmbCarrera.Items.Add("Software");'],
+                ['chk', 'CheckBox', 'Casilla que se marca o desmarca.', `<label><input type="checkbox" data-e="CheckedChanged" data-t="change"> Acepto los términos</label>`, 'if (chkAcepto.Checked) { ... }'],
+                ['rdb', 'RadioButton', 'Permite elegir solo una opción dentro de un grupo.', `<label><input type="radio" name="rg" checked data-e="CheckedChanged" data-t="change"> Mañana</label><label><input type="radio" name="rg" data-e="CheckedChanged" data-t="change"> Tarde</label>`, 'rdbTarde.Checked = true;'],
+                ['lst', 'ListBox', 'Lista visible con varios elementos.', `<select size="4" data-e="SelectedIndexChanged" data-t="change"><option>Ana</option><option>Luis</option><option>Marta</option><option>Pedro</option></select>`, 'lstAlumnos.Items.Add(txtNombre.Text);'],
+                ['nud', 'NumericUpDown', 'Selector numérico con flechas y límites.', `<input type="number" min="0" max="100" value="18" data-e="ValueChanged" data-t="input">`, 'int edad = (int)nudEdad.Value;'],
+                ['dtp', 'DateTimePicker', 'Selector de fechas con calendario.', `<input type="date" value="2026-10-01" data-e="ValueChanged" data-t="change">`, 'DateTime f = dtpNacimiento.Value;'],
+                ['prg', 'ProgressBar', 'Barra que muestra el avance de una tarea.', `<progress value="30" max="100" style="width:100%"></progress><button class="btn ghost" style="margin:8px 0 0" data-e="PerformStep()" data-t="click" onclick="var p=this.parentNode.querySelector('progress');p.value=p.value>=100?0:p.value+10">Avanzar +10</button>`, 'prgCarga.Value = 60;'],
+                ['grp', 'GroupBox / Panel', 'Contenedor que agrupa controles relacionados.', `<fieldset><legend>Datos del alumno</legend>Mover el GroupBox mueve todo lo que contiene. Panel es igual, sin título.</fieldset>`, 'grpDatos.Text = "Datos del alumno";', 'Es un contenedor: casi no tiene eventos propios.'],
+                ['tab', 'TabControl', 'Organiza el contenido en pestañas.', `<div><button class="ib" data-e="SelectedIndexChanged" data-t="click" onclick="this.parentNode.nextElementSibling.textContent='Contenido de la pestaña General'">General</button> <button class="ib" data-e="SelectedIndexChanged" data-t="click" onclick="this.parentNode.nextElementSibling.textContent='Contenido de la pestaña Avanzado'">Avanzado</button></div><div style="margin-top:8px;color:var(--mu);font-size:.88rem">Contenido de la pestaña General</div>`, 'tabcMain.SelectedIndex = 1;'],
+                ['dgv', 'DataGridView', 'Tabla editable para mostrar datos.', `<table data-e="CellClick" data-t="click"><thead><tr><th>Id</th><th>Nombre</th><th>Nota</th></tr></thead><tbody><tr><td>1</td><td>Ana</td><td>9.5</td></tr><tr><td>2</td><td>Luis</td><td>8.0</td></tr><tr><td>3</td><td>Marta</td><td>9.0</td></tr></tbody></table>`, 'dgvNotas.DataSource = listaAlumnos;'],
+                ['mnu', 'MenuStrip', 'Barra de menús en la parte superior.', `<button class="ib" data-e="ToolStripMenuItem.Click" data-t="click">Archivo</button> <button class="ib" data-e="ToolStripMenuItem.Click" data-t="click">Editar</button> <button class="ib" data-e="ToolStripMenuItem.Click" data-t="click">Ayuda</button>`, 'mnuSalir.Click += (s, e) => Close();'],
+                ['tmr', 'Timer', 'Ejecuta código cada cierto tiempo, sin ser visible.', `<span id="tk">Tick #0</span> <button class="btn ghost" onclick="var s=this;if(s._t){clearInterval(s._t);s._t=0;s.textContent='Iniciar'}else{var c=0;s._t=setInterval(function(){document.getElementById('tk').textContent='Tick #'+(++c)},1000);s.textContent='Detener'}">Iniciar</button>`, 'tmrReloj.Interval = 1000; tmrReloj.Start();', 'Tick se dispara cada Interval milisegundos.']
+            ];
+            var gal = $('gal');
+            G.forEach(function (g) {
+                var d = document.createElement('div'); d.className = 'card';
+                d.innerHTML = '<span class="tag">' + g[0] + '</span><h3>' + g[1] + '</h3><p style="margin:6px 0 0;font-size:.9rem;color:var(--mu)">' + g[2] + '</p><div class="demo">' + g[3] + '</div><div class="ev">' + (g[5] || 'Interactúa con el control.') + '</div><div class="cd"></div>';
+                d.querySelector('.cd').textContent = g[4];
+                d.querySelectorAll('[data-e]').forEach(function (el) {
+                    el.addEventListener(el.dataset.t, function (ev) {
+                        var v = '';
+                        if (el.type === 'checkbox' || el.type === 'radio') v = 'Checked = ' + ev.target.checked;
+                        else if (el.tagName === 'TABLE') v = 'celda "' + ev.target.textContent + '"';
+                        else if (el.tagName !== 'BUTTON' && el.value !== undefined) v = 'valor "' + el.value + '"';
+                        d.querySelector('.ev').textContent = '▸ ' + el.dataset.e + (v ? ' · ' + v : '')
+                    })
+                });
+                gal.appendChild(d)
+            });
+        })();
+    </script>
+</body>
+
+</html>
